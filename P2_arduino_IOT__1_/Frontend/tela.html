@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monitor de Sensor Arduino</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background: #0f172a;
+      color: #f8fafc;
+      font-family: "Segoe UI", sans-serif;
+      text-align: center;
+      padding: 2rem;
+    }
+    canvas {
+      width: 90%;
+      max-width: 900px;
+      height: 400px;
+      margin: 2rem auto;
+      background: #1e293b;
+      border-radius: 10px;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>📊 Monitor de Ativações do Sensor</h1>
+  <p>Leituras gravadas pelo Arduino em tempo real</p>
+
+  <canvas id="sensorChart"></canvas>
+
+  <script>
+    const ctx = document.getElementById('sensorChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Ativações do Sensor',
+          data: [],
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59,130,246,0.2)',
+          borderWidth: 2,
+          tension: 0.25,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: { title: { display: true, text: 'Horário' }},
+          y: { title: { display: true, text: 'Número de ativações' }, beginAtZero: true }
+        }
+      }
+    });
+
+    async function atualizarGrafico() {
+      const response = await fetch('/data');
+      const data = await response.json();
+      chart.data.labels = data.labels;
+      chart.data.datasets[0].data = data.values;
+      chart.update();
+    }
+
+    // Atualiza o gráfico a cada 5 segundos
+    setInterval(atualizarGrafico, 5000);
+    atualizarGrafico();
+  </script>
+</body>
+</html>
