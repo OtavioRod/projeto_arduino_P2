@@ -1,6 +1,9 @@
 python -m venv .venv
 call .venv\Scripts\activate.bat
-pip install pyserial
+python -m pip install pyserial
+python -m pip install fastapi
+python -m pip install pandas
+python -m pip install matplotlib
 
 REM Instala Poetry dentro do venv
 python -m pip install --upgrade pip
