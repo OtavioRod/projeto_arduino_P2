@@ -79,43 +79,7 @@ void setup() {
   pinMode(sensor, INPUT);
   Serial.begin(115200);
 }
-/*
-void loop() {
-  int sensorValue = analogRead(sensor); // Lê o valor do sensor
-  int number = map(sensorValue, 0, 1023, 0, 99); // Mapeia o valor do sensor para um número entre 0 e 99
-  
-  // Declarar as variáveis tens e ones (dezena e unidade)
-  int tens = number / 10;  // Dezena
-  int ones = number % 10;  // Unidade
 
-
-
-
-
-  Serial.println(analogRead(sensor));
-  delay(1);
-  if (analogRead(sensor) >1024){
-    digitalWrite(LED_vermelho, HIGH);
-    //digitalWrite(LED_amarelo, HIGH);
-    digitalWrite(LED_verde, LOW);
-    Serial.println("HIGH");
-    Serial.println(analogRead(sensor));
-
-
-    displayDigit(tens, 2);  // Exibe a dezena no primeiro dígito
-    //displayDigit(ones, 2);
-
-  }else{
-    digitalWrite(LED_vermelho, LOW);
-    //digitalWrite(LED_amarelo, LOW);
-    digitalWrite(LED_verde, HIGH);
-    Serial.println("LOW");
-    displayDigit(tens, 2);
-    //displayDigit(3);
-  }
-}
-
-*/
 void loop() {
   digitalWrite(8, HIGH);
   
