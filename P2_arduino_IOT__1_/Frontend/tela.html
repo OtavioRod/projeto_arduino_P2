@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Monitor de Sensor Arduino</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       background: #0f172a;
@@ -13,14 +12,16 @@
       text-align: center;
       padding: 2rem;
     }
-    canvas {
+    .grafico {
       width: 90%;
       max-width: 900px;
-      height: 400px;
       margin: 2rem auto;
-      background: #1e293b;
       border-radius: 10px;
       padding: 10px;
+      background: #1e293b;
+    }
+    h2 {
+      margin-top: 2rem;
     }
   </style>
 </head>
@@ -28,44 +29,28 @@
   <h1>📊 Monitor de Ativações do Sensor</h1>
   <p>Leituras gravadas pelo Arduino em tempo real</p>
 
-  <canvas id="sensorChart"></canvas>
+  <h2>Ativações por dia</h2>
+  <img class="grafico" id="graficoDia" src="/graficos/por-dia" alt="Gráfico por dia">
+
+  <h2>Distribuição por hora</h2>
+  <img class="grafico" id="graficoHora" src="/graficos/por-hora" alt="Gráfico por hora">
+
+  <h2>Ativações por minuto do dia</h2>
+  <img class="grafico" id="graficoMinuto" src="/graficos/por-minuto" alt="Gráfico por minuto">
+
+  <h2>Linha do tempo dos acionamentos</h2>
+  <img class="grafico" id="graficoLinhaTempo" src="/graficos/linha-do-tempo" alt="Linha do tempo">
 
   <script>
-    const ctx = document.getElementById('sensorChart').getContext('2d');
-    const chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: [],
-        datasets: [{
-          label: 'Ativações do Sensor',
-          data: [],
-          borderColor: '#3b82f6',
-          backgroundColor: 'rgba(59,130,246,0.2)',
-          borderWidth: 2,
-          tension: 0.25,
-          fill: true
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          x: { title: { display: true, text: 'Horário' }},
-          y: { title: { display: true, text: 'Número de ativações' }, beginAtZero: true }
-        }
-      }
-    });
-
-    async function atualizarGrafico() {
-      const response = await fetch('/data');
-      const data = await response.json();
-      chart.data.labels = data.labels;
-      chart.data.datasets[0].data = data.values;
-      chart.update();
+    // Atualiza os gráficos a cada 5 segundos
+    function atualizarGraficos() {
+      document.getElementById('graficoDia').src = '/graficos/por-dia?cache=' + new Date().getTime();
+      document.getElementById('graficoHora').src = '/graficos/por-hora?cache=' + new Date().getTime();
+      document.getElementById('graficoMinuto').src = '/graficos/por-minuto?cache=' + new Date().getTime();
+      document.getElementById('graficoLinhaTempo').src = '/graficos/linha-do-tempo?cache=' + new Date().getTime();
     }
 
-    // Atualiza o gráfico a cada 5 segundos
-    setInterval(atualizarGrafico, 5000);
-    atualizarGrafico();
+    setInterval(atualizarGraficos, 30000);
   </script>
 </body>
 </html>

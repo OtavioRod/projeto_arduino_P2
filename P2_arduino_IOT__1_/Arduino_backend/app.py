@@ -1,5 +1,28 @@
+from turtle import update
+from typing import Annotated
+from sqlalchemy.ext.automap import automap_base
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy import create_engine, select,MetaData, Table, select, distinct, update, text
+from fastapi import FastAPI, HTTPException, status, Depends, Security, Form, Response, Cookie, Request, Body
+from pydantic import BaseModel, EmailStr
+from jose import JWTError, jwt
+from datetime import datetime, timedelta, timezone, date
+from fastapi.security import OAuth2PasswordBearer,HTTPBasic, HTTPBasicCredentials
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, JSONResponse
+from sqlalchemy import func
+
+
+
+
+
+
 import pandas as pd
+import matplotlib
+matplotlib.use("Agg")  # renderização em memória, sem abrir janelas
 import matplotlib.pyplot as plt
+
 from sqlalchemy import create_engine, Column, Integer, DateTime
 from sqlalchemy.orm import declarative_base, sessionmaker
 from datetime import datetime
@@ -82,7 +105,7 @@ plt.xlabel("Data")
 plt.ylabel("Quantidade de acionamentos")
 plt.xticks(rotation=45)
 plt.tight_layout()
-plt.show()
+
 
 # === 2️⃣ Histogramas de horários de acionamento ===
 plt.figure(figsize=(10,5))
@@ -92,7 +115,7 @@ plt.xlabel("Hora do dia")
 plt.ylabel("Quantidade de acionamentos")
 plt.xticks(range(0,25))
 plt.tight_layout()
-plt.show()
+
 
 # === 3️⃣ Linha do tempo dos acionamentos ===
 plt.figure(figsize=(12,4))
@@ -102,9 +125,6 @@ plt.xlabel("Horário")
 plt.ylabel("Número de acionamentos")
 plt.grid(True)
 plt.tight_layout()
-plt.show()
-
-
 
 
 
@@ -112,10 +132,23 @@ plt.show()
 
 app = FastAPI()
 
+app.mount("/app", StaticFiles(directory="Frontend", html=True), name="frontend")
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8000", "http://127.0.0.1:8000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+
 # === Conexão com o banco de dados ===
 DATABASE_URL = "postgresql://postgres:univassouras@localhost:5432/Arduino"
 engine = create_engine(DATABASE_URL)
-
+'''
 # Função para obter dados do sensor
 def get_sensor_data():
     query = "SELECT * FROM sensor_acoes ORDER BY horario"
@@ -133,7 +166,7 @@ def plot_to_png(plt):
     plt.close()
     buf.seek(0)
     return buf.getvalue()
-
+'''
 # === Endpoint 1: Acionamentos por dia ===
 @app.get("/graficos/por-dia")
 def graficos_por_dia():
@@ -196,3 +229,37 @@ def graficos_linha_do_tempo():
     plt.tight_layout()
     
     return Response(content=plot_to_png(plt), media_type="image/png")
+
+
+
+
+
+def get_sensor_data():
+    """
+    Lê os dados do banco e retorna um DataFrame com colunas:
+    'horario', 'data', 'hora', 'minuto'.
+    """
+    query = "SELECT * FROM sensor_acoes ORDER BY horario"
+    df = pd.read_sql(query, engine)
+
+    # Garantir que 'horario' seja datetime
+    df['horario'] = pd.to_datetime(df['horario'])
+
+    # Colunas úteis
+    df['data'] = df['horario'].dt.date
+    df['hora'] = df['horario'].dt.hour
+    df['minuto'] = df['horario'].dt.minute
+
+    return df
+
+
+
+def plot_to_png(plt):
+    """
+    Converte um gráfico do Matplotlib em bytes PNG.
+    """
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', bbox_inches='tight')
+    plt.close()  # fecha o gráfico para liberar memória
+    buf.seek(0)
+    return buf.getvalue()
